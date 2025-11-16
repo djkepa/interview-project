@@ -70,6 +70,12 @@ Your solution will be evaluated based on:
 2. Implementing an effective fix
 3. Clearly explaining your troubleshooting process and solution
 
+## Restrictions
+
+You must not seek direct help from others or use pre-existing solutions.
+You are allowed to use any external resources, documentation, internet searches, etc.
+You are allowed to use AI tools or any AI-generated content as part of your research, but you must ensure that the final solution is your own work.
+
 ## Submission
 
 Fork this repository, implement your solution, and provide a link to your forked repository.

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { t } from '@/lib/i18n';
 import { ImageSkeleton } from './ImageSkeleton';
@@ -10,6 +10,10 @@ interface UploadSuccessProps {
 
 export const UploadSuccess = ({ imageUrl, onReset }: UploadSuccessProps) => {
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+  }, [imageUrl]);
 
   return (
     <div className="animate-slideIn mt-4 rounded-xl bg-gradient-to-br from-green-900/20 via-emerald-900/20 to-teal-900/20 p-5 shadow-2xl">
@@ -48,8 +52,9 @@ export const UploadSuccess = ({ imageUrl, onReset }: UploadSuccessProps) => {
             alt="Uploaded"
             fill
             className="rounded-xl object-cover shadow-2xl transition-all duration-500"
-            onLoad={() => setLoading(false)}
+            onLoadingComplete={() => setLoading(false)}
             unoptimized
+            priority
           />
         </div>
       </div>

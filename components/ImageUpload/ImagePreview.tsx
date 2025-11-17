@@ -21,8 +21,9 @@ export const ImagePreview = ({ src, alt = 'Preview' }: ImagePreviewProps) => {
           alt={alt}
           fill
           className="rounded-xl object-cover shadow-xl transition-all duration-300"
-          onLoad={() => setLoading(false)}
+          onLoadingComplete={() => setLoading(false)}
           unoptimized
+          priority
         />
       </div>
     </div>

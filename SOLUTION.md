@@ -27,7 +27,7 @@
 ### The Problem in Detail
 
 When users uploaded images:
-- ✅ **Development mode** (`npm run dev`): Images uploaded and displayed correctly at `/uploads/image-xxx.png`
+- **Development mode** (`npm run dev`): Images uploaded and displayed correctly at `/uploads/image-xxx.png`
 - ❌ **Docker/Production** (`npm start`): Upload succeeded, but preview returned 404 errors
 
 ### Why It Worked in Development
@@ -175,10 +175,10 @@ Stage 3 (runner): Minimal runtime image
 ```
 
 **Security Best Practices:**
-- ✅ Non-root user (`nextjs:nodejs`) with UID/GID 1001
-- ✅ Minimal attack surface (alpine base, production deps only)
-- ✅ Proper file permissions (755 for uploads)
-- ✅ Cache cleanup (`npm cache clean --force`)
+- Non-root user (`nextjs:nodejs`) with UID/GID 1001
+- Minimal attack surface (alpine base, production deps only)
+- Proper file permissions (755 for uploads)
+- Cache cleanup (`npm cache clean --force`)
 
 **Production Features:**
 - Built-in healthcheck using the `/api/health` endpoint
@@ -343,12 +343,13 @@ curl http://localhost:3000/api/uploads/<filename>
 ### Test Results
 
 All tests passed successfully:
-- ✅ Local development: Upload and preview work
-- ✅ Docker: Upload and preview work
-- ✅ Persistence: Files survive container restarts
-- ✅ Health checks: Container reports healthy
-- ✅ Validation: File size and type limits enforced
-- ✅ Security: Path traversal attempts blocked
+- **62 unit tests pass** with **81.8% code coverage**
+- Local development: Upload and preview work
+- Docker: Upload and preview work
+- Persistence: Files survive container restarts
+- Health checks: Container reports healthy
+- Validation: File size and type limits enforced
+- Security: Path traversal attempts blocked
 
 ---
 
@@ -460,24 +461,38 @@ npm run type-check             # TypeScript validation
 ### Files Created
 - `app/api/uploads/[filename]/route.ts` - Dynamic file serving endpoint
 - `app/api/health/route.ts` - Health check endpoint
-- `__tests__/api/*.test.ts` - Unit tests for API routes
-- `jest.config.js` - Test configuration
+- `__tests__/api/*.test.ts` - API integration tests (health, upload-image, uploads-filename)
+- `__tests__/hooks/*.test.tsx` - Hook integration tests (useImageUpload)
+- `__tests__/components/*.test.tsx` - Component integration tests (ImagePreview, ImageUploadForm, UploadSuccess, UploadError)
+- `components/ImageUpload/*` - Modular UI components
+- `hooks/useImageUpload.ts` - Custom React hook for upload logic
+- `lib/i18n/*` - Internationalization system
+- `jest.config.js` - Test configuration (multi-project setup)
+- `jest.setup.js` - Test environment setup
+- `.prettierrc.json` - Code formatting configuration
+- `.gitlab-ci.yml` - CI/CD pipeline configuration
 
 ### Files Modified
-- `app/api/upload-image/route.ts` - Added validation & security checks
+- `app/api/upload-image/route.ts` - Added validation, security, error handling
+- `app/page.tsx` - Refactored to use custom hook and modular components
+- `app/layout.tsx` - Updated metadata
+- `app/globals.css` - Added animations for dark mode UI
 - `Dockerfile` - 3-stage build, non-root user, health check
 - `docker-compose.yml` - Health checks, volumes, resource limits
-- `package.json` - Test scripts and dependencies
-- `.gitignore` - Exclude uploads directory
+- `package.json` - Test scripts, quality tools, dependencies
+- `.gitignore` - Exclude uploads, environment files
+- `.eslintrc.json` - Linting rules with test overrides
 
 ### Additional Improvements (Beyond Requirements)
-- Component-based architecture for better maintainability
-- Custom React hooks for reusable logic
-- Internationalization (i18n) system for future scaling
-- Dark mode support with theme context
-- Image loading skeletons for better UX
-- CI/CD pipeline configuration (GitLab CI)
-- Code quality tools (ESLint, Prettier)
+- **Component-based architecture** - Separated concerns for maintainability
+- **Custom React hooks** - Reusable logic with `useImageUpload`, `useState`, `useCallback`, `useRef`
+- **Internationalization (i18n)** - Centralized translations in JSON
+- **Modern dark mode UI** - Gradients, animations, shadows, SVG icons
+- **Image loading skeletons** - Better UX during image load
+- **CI/CD pipeline** - GitLab CI configuration with multi-stage validation
+- **Code quality tools** - ESLint, Prettier, Husky pre-commit hooks
+- **Next.js Image optimization** - Using `next/image` for better performance
+- **Comprehensive testing** - 62 tests, 81.8% coverage, Jest + React Testing Library
 
 ---
 
@@ -486,24 +501,25 @@ npm run type-check             # TypeScript validation
 This solution demonstrates:
 
 ### Core Requirements (What Was Asked)
-✅ **Root Cause Identification** - Deep analysis of Next.js static vs dynamic file serving  
-✅ **Bug Fix** - Implemented dynamic API endpoint for consistent behavior  
-✅ **Docker Compatibility** - Works reliably in containerized environments  
-✅ **Persistence** - Proper volume configuration for data retention  
-✅ **Documentation** - Clear explanation of problem, solution, and testing  
+**Root Cause Identification** - Deep analysis of Next.js static vs dynamic file serving  
+**Bug Fix** - Implemented dynamic API endpoint for consistent behavior  
+**Docker Compatibility** - Works reliably in containerized environments  
+**Persistence** - Proper volume configuration for data retention  
+**Documentation** - Clear explanation of problem, solution, and testing  
 
 ### Production-Ready Additions (Going Beyond)
-✅ **Security** - File validation, size limits, non-root container  
-✅ **Monitoring** - Health check endpoint for operational visibility  
-✅ **Testing** - 36 unit tests covering API routes and business logic  
-✅ **Best Practices** - Multi-stage Docker build, resource limits  
+**Security** - File validation, size limits, path traversal protection, non-root container  
+**Monitoring** - Health check endpoint for operational visibility  
+**Testing** - **62 integration tests** with **81.8% code coverage**  
+**Best Practices** - Multi-stage Docker build, resource limits, code quality automation  
+**Modern Architecture** - Component-based, hooks, i18n, responsive dark mode UI  
 
-The solution not only fixes the immediate bug but also establishes a solid foundation for production deployment with security, monitoring, and maintainability in mind.
+The solution not only fixes the immediate bug but also establishes a **production-ready foundation** with comprehensive testing, security hardening, and maintainability in mind.
 
 ---
 
 **Author**: Branislav Grozdanovic  
 **Date**: November 17, 2025  
 **Version**: 1.0.0  
-**Status**: ✅ Production-Ready
+**Status**: Production-Ready
 

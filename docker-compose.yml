@@ -1,13 +1,85 @@
-version: '3.8'
-
+# =============================================================================
+# Docker Compose configuration for Next.js Image Upload Application
+# Production-ready setup with health checks and persistent storage
+# =============================================================================
 services:
   nextjs-app:
+    container_name: nextjs-interview-app
     build:
       context: .
       dockerfile: Dockerfile
+      # Build arguments for future flexibility
+      args:
+        NODE_VERSION: 20
+
+    # Port mapping: host:container
     ports:
-      - "3000:3000"
+      - '3000:3000'
+
+    # Volume mounts for persistent storage
+    # CRITICAL: Uploaded images persist even if container is restarted/rebuilt
     volumes:
-      - ./public/uploads:/app/public/uploads
+      # Mount uploads directory for persistence
+      # Path changed from /public/uploads to /uploads to match new architecture
+      - ./uploads:/app/uploads
+      # Optional: mount for logs if needed
+      # - ./logs:/app/logs
+
+    # Environment variables
     environment:
       - NODE_ENV=production
+      - PORT=3000
+      # Future: Add these when implementing cloud storage
+      # - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      # - AWS_REGION=${AWS_REGION}
+
+    # Optional: Load from .env file
+    # env_file:
+    #   - .env
+
+    # Health check configuration
+    # Docker will automatically restart unhealthy containers
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+    # Restart policy for production resilience
+    restart: unless-stopped
+
+    # Resource limits (best practice for production)
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+    # Logging configuration
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+    # Network configuration (future: add reverse proxy)
+    # networks:
+    #   - app-network
+# Optional: Define custom networks for multi-container setups
+# networks:
+#   app-network:
+#     driver: bridge
+
+# Optional: Define named volumes (alternative to bind mounts)
+# volumes:
+#   uploads-data:

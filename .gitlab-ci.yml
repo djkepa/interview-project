@@ -1,0 +1,188 @@
+# GitLab CI/CD Pipeline
+# Production-ready pipeline with testing, building, and deployment
+
+stages:
+  - validate
+  - test
+  - build
+  - deploy
+  - cleanup
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  IMAGE_LATEST: $CI_REGISTRY_IMAGE:latest
+
+# Cache for faster builds
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .next/cache/
+
+# === VALIDATE STAGE ===
+lint:
+  stage: validate
+  image: node:20-alpine
+  before_script:
+    - npm ci
+  script:
+    - npm run lint
+    - npm run format:check
+  only:
+    - branches
+    - merge_requests
+
+type-check:
+  stage: validate
+  image: node:20-alpine
+  before_script:
+    - npm ci
+  script:
+    - npm run type-check
+  only:
+    - branches
+    - merge_requests
+
+# === TEST STAGE ===
+unit-tests:
+  stage: test
+  image: node:20-alpine
+  before_script:
+    - npm ci
+  script:
+    - npm run test:ci
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 30 days
+  only:
+    - branches
+    - merge_requests
+
+# === BUILD STAGE ===
+build-app:
+  stage: build
+  image: node:20-alpine
+  before_script:
+    - npm ci
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - .next/
+      - public/
+    expire_in: 1 day
+  only:
+    - main
+    - develop
+    - tags
+
+build-docker:
+  stage: build
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $IMAGE_TAG -t $IMAGE_LATEST .
+    - docker push $IMAGE_TAG
+    - docker push $IMAGE_LATEST
+  only:
+    - main
+    - tags
+
+# === DEPLOY STAGE ===
+deploy-staging:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$STAGING_HOST "
+        cd /opt/interview-project &&
+        docker-compose pull &&
+        docker-compose up -d &&
+        docker-compose exec -T nextjs-app curl -f http://localhost:3000/api/health
+      "
+  environment:
+    name: staging
+    url: https://staging.example.com
+  only:
+    - develop
+
+deploy-production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$PRODUCTION_HOST "
+        cd /opt/interview-project &&
+        docker-compose pull &&
+        docker-compose up -d &&
+        docker-compose exec -T nextjs-app curl -f http://localhost:3000/api/health
+      "
+  environment:
+    name: production
+    url: https://example.com
+  when: manual
+  only:
+    - main
+    - tags
+
+# === CLEANUP STAGE ===
+cleanup-old-images:
+  stage: cleanup
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  script:
+    - docker image prune -af --filter "until=168h"
+  only:
+    - schedules
+
+# === SECURITY SCANNING ===
+security-scan:
+  stage: test
+  image: node:20-alpine
+  before_script:
+    - npm ci
+  script:
+    - npm audit --audit-level=moderate
+  allow_failure: true
+  only:
+    - branches
+    - merge_requests
+
+# === HEALTH CHECK POST-DEPLOY ===
+health-check:
+  stage: deploy
+  image: curlimages/curl:latest
+  script:
+    - sleep 10
+    - curl -f $CI_ENVIRONMENT_URL/api/health
+  only:
+    - main
+    - develop
+  needs:
+    - deploy-staging
+  when: on_success
+

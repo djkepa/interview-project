@@ -1,0 +1,32 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "imageUpload": {
+    "title": "Image Upload",
+    "subtitle": "Upload images securely with validation",
+    "form": {
+      "title": "Upload Image",
+      "selectImage": "Select Image",
+      "uploadButton": "Upload Image",
+      "uploadingButton": "Uploading...",
+      "uploadAnother": "Upload Another"
+    },
+    "preview": {
+      "title": "Preview:"
+    },
+    "error": {
+      "title": "Error:",
+      "network": "Network error. Please try again.",
+      "noFile": "Please select a file first.",
+      "generic": "Upload failed"
+    },
+    "success": {
+      "message": "Image uploaded successfully!",
+      "viewFullImage": "View Full Image"
+    }
+  }
+}
+

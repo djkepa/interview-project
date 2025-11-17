@@ -1,96 +1,166 @@
-# Next.js Interview Project
+# Next.js Interview Project - Image Upload Application
 
-This is a [Next.js](https://nextjs.org) project designed for interview candidates to demonstrate their troubleshooting and Docker skills.
+Production-ready Next.js application with Docker support for image uploads.
 
-## Project Overview
+## ⚡ Quick Start
 
-This application allows users to:
-1. Upload images to the server
-2. Retrieve and display a preview of the uploaded images
-
-The project intentionally contains an issue that candidates need to identify and fix.
-
-Feel free to modify any files in the project to resolve the issue. But the core functionality should behave as expected.
-
-The final solution should ensure that image upload and preview work correctly both in development and when running the application in a Docker container.
-
-## Getting Started
-
-### Local Development
-
-First, clone the repository and install dependencies:
+### Local Development (2 minutes)
 
 ```bash
-git clone <repository-url>
-cd interview-project
 npm install
-```
-
-Then run the development server:
-
-```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
+Open http://localhost:3000 and upload an image!
 
-### The Challenge
-
-When running the application in development mode (`npm run dev`), everything works correctly. However, when running the application using Docker:
+### Docker (5 minutes)
 
 ```bash
-docker-compose up
+docker-compose up --build
 ```
 
-You'll notice that image uploads works but the preview fails. Your task is to:
+Wait for "healthy" status, then open http://localhost:3000
 
-1. Identify why image upload and preview work in development but fail in Docker
-2. Provide a fix to ensure both functionalities work in Docker
-3. Document your solution
+### Run Tests
 
-## Technical Details
+```bash
+npm test              # Run all tests
+npm run test:watch    # Watch mode
+npm run test:coverage # Coverage report
+```
 
-### Project Structure
+---
 
-- `app/page.tsx`: Main application page image upload forms
-- `app/api/upload-image/route.ts`: API endpoint for uploading images
-- `Dockerfile`: Configuration for building the Docker image
-- `docker-compose.yml`: Configuration for running the application with Docker Compose
+## 🎯 Problem & Solution
 
-### Expected Behavior
+**Original Problem:** Images uploaded in Docker containers returned 404 errors.
 
-- Image upload and preview should work in both development and Docker environments
-- Uploaded files should persist even if the Docker container is restarted
+**Root Cause:** Next.js production doesn't serve runtime-added files from `/public`.
 
-## Solution Criteria
+**Solution:** Dynamic API endpoint (`/api/uploads/[filename]`) for consistent file serving.
 
-Your solution will be evaluated based on:
+**Details:** See [SOLUTION.md](SOLUTION.md)
 
-1. Correctly identifying the root cause of the issue
-2. Implementing an effective fix
-3. Clearly explaining your troubleshooting process and solution
+---
 
-## Restrictions
+## 📁 Project Structure
 
-You must not seek direct help from others or use pre-existing solutions.
-You are allowed to use any external resources, documentation, internet searches, etc.
-You are allowed to use AI tools or any AI-generated content as part of your research, but you must ensure that the final solution is your own work.
+```
+interview-project/
+├── app/
+│   ├── api/
+│   │   ├── health/              # Health check endpoint
+│   │   ├── upload-image/        # Image upload handler
+│   │   └── uploads/[filename]/  # Dynamic image serving
+│   └── page.tsx                 # Main UI (42 lines, clean!)
+├── components/ImageUpload/      # Modular UI components
+├── hooks/                       # Custom React hooks
+├── lib/i18n/                    # Internationalization (i18n)
+├── __tests__/                   # Jest unit tests
+├── Dockerfile                   # Production-ready 3-stage build
+├── docker-compose.yml           # Container orchestration
+├── Makefile                     # Quick commands
+└── SOLUTION.md                  # Technical documentation ⭐
+```
 
-## Submission
+---
 
-Fork this repository, implement your solution, and provide a link to your forked repository.
+## 🚀 Features
 
-Please document your solution in a separate file named `SOLUTION.md`, including:
+- ✅ Image upload with validation (10MB limit, type checking)
+- ✅ Works in development & Docker
+- ✅ Persistent storage (Docker volumes)
+- ✅ Health check endpoint (`/api/health`)
+- ✅ Security (non-root container, path traversal protection)
+- ✅ Unit tests (Jest)
+- ✅ Production-ready Docker setup
+- ✅ i18n ready (internationalization)
+- ✅ Modular components (separation of concerns)
+- ✅ CI/CD pipelines (GitLab + GitHub Actions)
 
-1. The issue you identified
-2. The changes you made to fix it
-3. Any additional improvements you would recommend
-4. Commands used to test your solution
+---
 
-## Additional Resources
+## 🧪 Testing
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Docker Documentation](https://docs.docker.com/)
-- [Docker Compose Documentation](https://docs.docker.com/compose/)
+```bash
+# Local testing
+npm run dev
+# Upload image at http://localhost:3000
 
-Good luck!
+# Docker testing
+docker-compose up --build
+# Upload image, restart container: docker-compose restart
+# Image should still be accessible
+
+# Health check
+curl http://localhost:3000/api/health
+
+# Run unit tests
+npm test
+```
+
+---
+
+## 📚 Documentation
+
+- **[SOLUTION.md](SOLUTION.md)** - Complete technical solution & root cause analysis ⭐
+
+---
+
+## 🔧 Commands
+
+### npm Scripts
+
+```bash
+# Development
+npm run dev              # Start dev server
+npm run build            # Build for production
+npm run start            # Start production server
+
+# Code Quality
+npm run quality          # Format + Lint + Type-check + Test (auto-fix)
+npm run validate         # Full validation (CI mode, no auto-fix)
+npm run lint             # Lint JS + CSS
+npm run lint:fix         # Auto-fix linting issues
+npm run format           # Format with Prettier
+npm run type-check       # TypeScript check
+
+# Testing
+npm test                 # Run tests
+npm run test:watch       # Watch mode
+npm run test:coverage    # Coverage report
+
+# Docker (simplified)
+npm run docker           # Start Docker (build + up in background)
+npm run docker:down      # Stop Docker
+npm run docker:logs      # View logs
+npm run docker:restart   # Restart Docker
+npm run health           # Health check
+
+# CI/CD
+npm run ci:test          # Full validation for CI
+npm run ci:build         # Build + Test for CI
+```
+
+---
+
+## 🏆 Solution Highlights
+
+1. **Root Cause Analysis** - Deep understanding of Next.js static vs dynamic serving
+2. **Production-Ready** - Security, monitoring, health checks, CI/CD
+3. **Well-Tested** - Unit tests with Jest (API + React hooks)
+4. **Clean Architecture** - Modular components, custom hooks, i18n
+5. **Professional Setup** - Prettier, ESLint, Stylelint, Husky pre-commit hooks
+
+---
+
+## 👨‍💻 Author
+
+**Branislav Grozdanovic**  
+**Date:** November 17, 2025  
+**Version:** 1.0.0  
+**Status:** ✅ Production-Ready
+
+---
+
+For detailed technical analysis, see **[SOLUTION.md](SOLUTION.md)**
